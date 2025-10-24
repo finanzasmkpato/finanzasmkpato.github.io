@@ -17,57 +17,65 @@ DATE_TODAY = datetime.date.today().isoformat()
 # ---------- IA ----------
 from huggingface_hub import InferenceClient
 from huggingface_hub.errors import RepositoryNotFoundError
-import requests
+import requests, os, random
 
 def generate_long_article(title: str, summary: str, tags: str) -> str:
     """
-    Genera artículo ~500 palabras con fallback automático.
-    Prioridad:
-      1️⃣ Modelo principal (configurado)
-      2️⃣ google/flan-t5-large (libre)
-      3️⃣ fallback offline
+    Genera artículo profesional (~1000 palabras) con estructura completa, tono editorial y SEO-friendly.
+    Incluye fallback automático si el modelo falla.
     """
+
     main_model = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct")
     backup_model = "google/flan-t5-large"
+    HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
-    if not HF_API_TOKEN:
-        return expand_fallback(title, summary, tags)
-
-    prompt = f"""
-    Escribe un artículo en español de unas 500 palabras titulado "{title}".
-    Basado en: "{summary}".
-    Estructura: introducción con gancho, desarrollo con 3 ideas prácticas, ejemplo o historia, y conclusión accionable.
-    Relaciónalo con temas de {tags or "productividad y finanzas"}.
-    Tono profesional, cercano y claro.
-    """
-
-    def infer(model_id):
+    def infer(model_id, prompt):
         client = InferenceClient(token=HF_API_TOKEN)
         return client.text_generation(
             model=model_id,
             prompt=prompt,
-            max_new_tokens=650,
-            temperature=0.8,
-            top_p=0.95,
-            repetition_penalty=1.05,
+            max_new_tokens=1300,
+            temperature=0.75,
+            top_p=0.92,
+            repetition_penalty=1.1,
             return_full_text=False,
         ).strip()
 
-    # --- Intento principal ---
-    try:
-        return cleanup(infer(main_model))
-    except (RepositoryNotFoundError, requests.exceptions.HTTPError) as e:
-        print(f"⚠️ Modelo principal inaccesible ({main_model}): {e}")
-        print("→ Probando modelo alternativo libre (flan-t5-large)...")
-        try:
-            return cleanup(infer(backup_model))
-        except Exception as e2:
-            print(f"⚠️ Fallback libre también falló: {e2}")
-            print("→ Generando texto offline.")
+    # 🔹 Variedad de estilo para rotar automáticamente
+    styles = [
+        "una guía práctica paso a paso",
+        "un artículo de reflexión profunda",
+        "una historia inspiradora con moraleja financiera",
+        "una mini-lección de productividad real",
+        "un análisis con ejemplos reales y consejos aplicables"
+    ]
+    tone = random.choice(styles)
+
+    # 🔹 Prompt mejorado para redacción PRO
+    prompt = f"""
+Eres un redactor experto en finanzas personales, productividad y hábitos.
+
+Redacta un artículo en español de unas 1000 palabras titulado "{title}".
+Debe estar basado en esta idea: "{summary}".
+
+El texto debe tener una estructura profesional con:
+1. Un subtítulo atractivo (H2) bajo el título principal.
+2. Una introducción con gancho y contexto real.
+3. Secciones claras con subtítulos H3.
+4. Listas con viñetas o pasos concretos.
+5. Un ejemplo real o mini-historia.
+6. Una conclusión potente con CTA implícito a mejorar la claridad financiera o usar el sistema de MkPato.
+
+Tono: claro, cercano, profesional, con autoridad amable.
+Evita relleno y frases vacías. Que aporte valor real y acción inmediata.
+
+Incluye etiquetas y menciona conceptos de {tags or "finanzas, productividad, claridad, hábitos"}.
+"""
+
+    def cleanup(text: str) -> str:
+        text = text.strip()
+        if not text:
             return expand_fallback(title, summary, tags)
-    except Exception as e:
-        print(f"⚠️ Error inesperado en generación: {e}")
-        return expand_fallback(title, summary, tags)
 
 
     client = InferenceClient(token=HF_API_TOKEN)
