@@ -124,7 +124,7 @@ TEMPLATE_POST = """<!doctype html>
 
 
 def render_post_html(title, body, url, tags, product_url, summary):
-    desc = (summary or body)[:150].replace('"', "")
+    desc = (summary or body)[:150].replace('"', "").replace("<", "").replace(">", "")
     ctas = [
         "Optimiza tus finanzas en 15 minutos al día.",
         "Convierte tus hábitos en libertad financiera.",
@@ -132,16 +132,18 @@ def render_post_html(title, body, url, tags, product_url, summary):
         "Descubre cómo multiplicar tu claridad en menos tiempo.",
     ]
     chosen_cta = random.choice(ctas)
+
     return TEMPLATE_POST.format(
         title=title,
         desc=desc,
         date=DATE_TODAY,
         summary=summary or "",
-        body=body.replace("\n", "<br><br>"),
+        body=body,  # ✅ sin replace ni comillas
         product=product_url,
         tags=tags,
         cta=chosen_cta,
     )
+
 
 
 # === PROCESO PRINCIPAL ===
