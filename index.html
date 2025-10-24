@@ -1,44 +1,67 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>MkPato — Convierte claridad en dinero</title>
-  <meta name="description" content="Ideas y recursos diarios para mejorar tus finanzas y productividad. Publicación automática + CTA a tu pack PRO.">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finanzas MkPato — Toma el control y gana dinero</title>
+<meta name="description" content="Acción simple y recursos que te ayudan a ganar dinero sin perder tiempo. Únete al canal de Telegram.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1221; --card:#0f172a; --text:#e6edf7; --muted:#9aa4b2;
+  --green:#10b981; --gold:#d4af37; --ring:rgba(16,185,129,.35);
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,Roboto}
+.container{max-width:980px;margin:0 auto;padding:28px 18px}
+.header{ text-align:center; padding:48px 12px 18px}
+.logo{width:96px;height:auto;opacity:.95;display:block;margin:0 auto 10px}
+.badge{display:inline-block;border:1px solid var(--ring);color:var(--green);
+  background:rgba(16,185,129,.1);padding:6px 10px;border-radius:999px;font-size:12px;letter-spacing:.06em}
+h1{font-size:42px;line-height:1.1;margin:12px 0 8px}
+.sub{color:var(--muted);max-width:680px;margin:0 auto 16px}
+.ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.btn{display:inline-block;padding:14px 22px;border-radius:14px;text-decoration:none;font-weight:800}
+.btn-primary{background:linear-gradient(135deg,var(--green),#2ee7b2);color:#07131a;border:1px solid #0b2d1f;box-shadow:0 10px 30px rgba(16,185,129,.18)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#f1d98a);color:#2b1f05;border:1px solid #6b5a18}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px}
+.card{background:var(--card);border:1px solid #1f2937;border-radius:18px;padding:18px}
+.card h3{margin:0 0 8px}
+.footer{color:var(--muted);text-align:center;padding:36px 0}
+a{color:var(--green);text-decoration:none}
+</style>
 </head>
 <body>
-<header class="container hero" style="text-align:center;">
-  <img src="/assets/DckFinalSinfondo.png" alt="MkPato logo" style="width:120px;height:auto;margin-bottom:10px;">
-  <span class="badge">Publicación automática diaria</span>
-  <h1>Convierte claridad en dinero 💶</h1>
-  <p class="muted">Guías accionables, mini-sistemas y prompts para <strong>dominar tus finanzas</strong> y tu tiempo.</p>
-  <a class="cta" href="https://go.hotmart.com/F102330634N?dp=1" target="_blank" rel="noopener">Acceder al Pack PRO</a>
-  <p style="margin-top:14px;">
-    <a href="/blog/" style="color:var(--brand);font-weight:600;">📚 Leer el blog completo</a>
-  </p>
-  <div class="grid">
-    <div class="card"><h3>🚀 Acción inmediata</h3><p>Micro-planes de 15 min. Menos teoría, más ejecución.</p></div>
-    <div class="card"><h3>🤖 Sistema autónomo</h3><p>Contenido diario + distribución automática. Tú cobras.</p></div>
-    <div class="card"><h3>📈 Enfoque en conversión</h3><p>CTA claro, sin fricción. Hotmart listo.</p></div>
-  </div>
-</header>
-
+  <header class="header container">
+    <img src="/assets/DckFinalSinfondo.png" alt="MkPato" class="logo">
+    <span class="badge">Acción simple · Resultados reales</span>
+    <h1>Toma el control y <span style="color:var(--gold)">gana dinero</span> sin perder tiempo</h1>
+    <p class="sub">Canal con recursos accionables, checklists y mini-sistemas útiles. Sin humo.</p>
+    <div class="ctas">
+      <a href="https://t.me/finanzas_mkpato" class="btn btn-primary">Únete al canal de Telegram</a>
+      <a href="https://t.me/mkpato_pro" class="btn btn-gold">Conocer MkPato PRO</a>
+    </div>
+    <div class="grid" style="margin-top:28px">
+      <div class="card"><h3>⚡ 10 minutos/día</h3><p>Rutinas de dinero accionables, sin complicarte.</p></div>
+      <div class="card"><h3>🧩 Recursos útiles</h3><p>Checklists, plantillas y retos que mueven el marcador.</p></div>
+      <div class="card"><h3>💶 Monetización real</h3><p>Productos propios + afiliados (sin ruido).</p></div>
+    </div>
+  </header>
 
   <main class="container">
-    <h2>Últimos artículos</h2>
-    <div class='postlist'><div><a href='/blog/prompt-útil-del-día.html'>Prompt Útil Del Día</a></div><div><a href='/blog/checklist-semanal-express.html'>Checklist Semanal Express</a></div><div><a href='/blog/macro-que-te-ahorra-tiempo.html'>Macro Que Te Ahorra Tiempo</a></div><div><a href='/blog/mini-hábito-de-claridad-diaria.html'>Mini Hábito De Claridad Diaria</a></div></div>
-    <div class="card" style="margin-top:18px">
-      <h3>¿Cómo usar este sitio para ganar dinero?</h3>
-      <p>Lee un artículo, aplica el <em>mini-sistema</em> y guarda el resultado. Repite durante 30 días. Si quieres la colección completa con plantillas y flujos, entra al <a href="https://go.hotmart.com/F102330634N?dp=1" target="_blank">Pack PRO</a>.</p>
+    <div class="card">
+      <h3>¿Qué vas a recibir?</h3>
+      <ul>
+        <li>Mensajes diarios accionables (automatizados y filtrados por calidad).</li>
+        <li>Descargables semanales en PDF (listos para usar).</li>
+        <li>Oportunidades reales de ingreso y ahorro (filtradas).</li>
+      </ul>
     </div>
   </main>
 
   <footer class="footer">
-    © <span id="y"></span> MkPato · <a href="/blog/" style="color:var(--brand)">Archivo</a>
+    © <span id="y"></span> MkPato · <a href="https://t.me/finanzas_mkpato">Canal</a> · <a href="https://t.me/mkpato_pro">PRO</a>
   </footer>
   <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
 </html>
-
