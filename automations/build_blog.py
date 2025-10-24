@@ -15,14 +15,60 @@ MODEL_ID = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct")  # puedes c
 DATE_TODAY = datetime.date.today().isoformat()
 
 # ---------- IA ----------
+from huggingface_hub import InferenceClient
+from huggingface_hub.errors import RepositoryNotFoundError
+import requests
+
 def generate_long_article(title: str, summary: str, tags: str) -> str:
     """
-    Genera un artículo ~500 palabras usando HuggingFace Inference API.
-    Requiere secret HF_API_TOKEN en el repo.
+    Genera artículo ~500 palabras con fallback automático.
+    Prioridad:
+      1️⃣ Modelo principal (configurado)
+      2️⃣ google/flan-t5-large (libre)
+      3️⃣ fallback offline
     """
+    main_model = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct")
+    backup_model = "google/flan-t5-large"
+
     if not HF_API_TOKEN:
-        # Fallback sin IA: expansión semántica offline
         return expand_fallback(title, summary, tags)
+
+    prompt = f"""
+    Escribe un artículo en español de unas 500 palabras titulado "{title}".
+    Basado en: "{summary}".
+    Estructura: introducción con gancho, desarrollo con 3 ideas prácticas, ejemplo o historia, y conclusión accionable.
+    Relaciónalo con temas de {tags or "productividad y finanzas"}.
+    Tono profesional, cercano y claro.
+    """
+
+    def infer(model_id):
+        client = InferenceClient(token=HF_API_TOKEN)
+        return client.text_generation(
+            model=model_id,
+            prompt=prompt,
+            max_new_tokens=650,
+            temperature=0.8,
+            top_p=0.95,
+            repetition_penalty=1.05,
+            return_full_text=False,
+        ).strip()
+
+    # --- Intento principal ---
+    try:
+        return cleanup(infer(main_model))
+    except (RepositoryNotFoundError, requests.exceptions.HTTPError) as e:
+        print(f"⚠️ Modelo principal inaccesible ({main_model}): {e}")
+        print("→ Probando modelo alternativo libre (flan-t5-large)...")
+        try:
+            return cleanup(infer(backup_model))
+        except Exception as e2:
+            print(f"⚠️ Fallback libre también falló: {e2}")
+            print("→ Generando texto offline.")
+            return expand_fallback(title, summary, tags)
+    except Exception as e:
+        print(f"⚠️ Error inesperado en generación: {e}")
+        return expand_fallback(title, summary, tags)
+
 
     client = InferenceClient(token=HF_API_TOKEN)
     prompt = f"""Eres un escritor experto en productividad y finanzas personales.
