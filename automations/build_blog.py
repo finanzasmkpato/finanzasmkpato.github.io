@@ -67,3 +67,55 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# … cabecera igual que la tuya …
+TEMPLATE_POST = """<!doctype html><html lang='es'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>{title}</title>
+<meta name='description' content='{desc}'>
+<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='/assets/style.css'>
+</head><body><div class='container post'>
+<p class='muted'>{date}</p>
+<h1>{title}</h1>
+{image}
+<p>{body}</p>
+<a class='cta' href='{product}' target='_blank' rel='noopener'>Acceder al Pack PRO</a>
+{link}
+<hr><p class='muted'>Etiquetas: {tags}</p>
+<p><a href='/blog/'>← Volver al archivo</a></p>
+</div></body></html>"""
+
+def render_post_html(title, body, url, image, tags, product_url, affiliate_tag):
+    import datetime
+    date = datetime.date.today().isoformat()
+    if affiliate_tag and url and "?" not in url:
+        url = f"{url}?tag={affiliate_tag}"
+    img = f"<img src='{image}' alt=''>" if image else ""
+    link = f"<p><a href='{url}' target='_blank' rel='noopener'>{url}</a></p>" if url else ""
+    return TEMPLATE_POST.format(
+        title=title, desc=body[:150].replace('"',''), date=date,
+        image=img, body=body, product=product_url or "#", link=link, tags=tags)
+
+def update_blog_index():
+    items=[]
+    for p in sorted(BLOG.glob("*.html"), key=lambda x: x.stat().st_mtime, reverse=True):
+        if p.name=="index.html": continue
+        title=p.stem.replace("-"," ").title()
+        items.append(f"<a href='/blog/{p.name}'>{title}</a>")
+    html=(ROOT/"blog/index.html").read_text(encoding="utf-8")
+    html=html.replace("<!-- items generated -->","\n".join(items))
+    (ROOT/"blog/index.html").write_text(html,encoding="utf-8")
+    return [i for i in BLOG.glob("*.html") if i.name!="index.html"]
+
+def update_home_latest(latest_files):
+    # inserta las 4 últimas en el home
+    links=[]
+    for p in sorted(latest_files, key=lambda x: x.stat().st_mtime, reverse=True)[:4]:
+        title=p.stem.replace("-"," ").title()
+        links.append(f"<a href='/blog/{p.name}'>{title}</a>")
+    home=(ROOT/"index.html").read_text(encoding="utf-8")
+    home=home.replace("<!-- LATEST_POSTS -->",
+                      "<div class='postlist'>"+ "".join(f"<div>{l}</div>" for l in links) + "</div>")
+    (ROOT/"index.html").write_text(home,encoding="utf-8")
+
