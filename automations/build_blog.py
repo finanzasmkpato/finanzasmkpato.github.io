@@ -31,17 +31,20 @@ def generate_long_article(title: str, summary: str, tags: str) -> str:
     HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
     # 🔹 Cliente de inferencia
-    def infer(model_id, prompt):
-        client = InferenceClient(token=HF_API_TOKEN)
-        return client.text_generation(
-            model=model_id,
-            prompt=prompt,
-            max_new_tokens=1300,
-            temperature=0.75,
-            top_p=0.92,
-            repetition_penalty=1.1,
-            return_full_text=False,
-        ).strip()
+def infer(model_id, prompt):
+    client = InferenceClient(token=HF_API_TOKEN)
+    # Para modelos tipo text2text-generation produce textos largos y estructurados
+    result = client.text_generation(
+        model=model_id,
+        prompt=prompt,
+        max_new_tokens=2000,
+        temperature=0.7,
+        top_p=0.9,
+        repetition_penalty=1.05,
+        return_full_text=False,
+    )
+    return result.strip()
+
 
     # 🔹 Variación automática de estilo
     styles = [
