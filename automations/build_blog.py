@@ -26,8 +26,8 @@ def generate_long_article(title: str, summary: str, tags: str) -> str:
     """
 
     # ✅ Modelos gratuitos y abiertos
-    main_model = os.getenv("HF_MODEL_ID", "tiiuae/falcon-7b-instruct")
-    backup_model = "google/flan-t5-large"
+    main_model = os.getenv("HF_MODEL_ID", "google/flan-t5-xl")
+    backup_model = "meta-llama/Llama-3-8b-instruct"
     HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
     # 🔹 Cliente de inferencia
