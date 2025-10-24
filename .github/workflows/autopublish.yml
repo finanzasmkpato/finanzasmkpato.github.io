@@ -1,7 +1,7 @@
 name: Auto Publish Daily
 on:
   schedule:
-    - cron: "5 7 * * *"
+    - cron: "5 7 * * *"   # 09:05 Madrid aprox.
   workflow_dispatch:
 
 permissions:
@@ -15,18 +15,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install requests
-      - name: Generar post
+      - run: |
+          python -m pip install --upgrade pip
+          pip install requests huggingface_hub
+      - name: Generar artículo y postear
         env:
           PRODUCT_URL: ${{ secrets.PRODUCT_URL }}
           AFFILIATE_TAG: ${{ secrets.AFFILIATE_TAG }}
-        run: python automations/build_blog.py
-      - name: Enviar a Telegram
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          PRODUCT_URL: ${{ secrets.PRODUCT_URL }}
-        run: python automations/post_telegram.py
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+          HF_MODEL_ID: mistralai/Mistral-7B-Instruct
+        run: |
+          python automations/build_blog.py
       - name: Commit
         run: |
           git config user.name "auto-publisher"
@@ -34,3 +33,9 @@ jobs:
           git add -A
           git commit -m "Auto publish $(date -u +'%Y-%m-%d')" || echo "No changes"
           git push
+      - name: Enviar a Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PRODUCT_URL: ${{ secrets.PRODUCT_URL }}
+        run: python automations/post_telegram.py
