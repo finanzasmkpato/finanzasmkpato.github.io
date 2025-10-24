@@ -1,9 +1,9 @@
-# build_blog.py — versión PRO MkPato
 from pathlib import Path
 import csv
 import datetime
 import os
 
+# Rutas
 ROOT = Path(__file__).resolve().parents[1]
 BLOG = ROOT / "blog"
 DATA = ROOT / "data" / "queue.csv"
@@ -11,7 +11,7 @@ PRODUCT_URL = os.getenv("PRODUCT_URL", "https://go.hotmart.com/F102330634N?dp=1"
 AFFILIATE_TAG = os.getenv("AFFILIATE_TAG", "")
 DATE_TODAY = datetime.date.today().isoformat()
 
-
+# ---------------- TEMPLATE ----------------
 TEMPLATE_POST = """<!doctype html>
 <html lang='es'>
 <head>
@@ -63,13 +63,6 @@ TEMPLATE_POST = """<!doctype html>
       width: 80px;
       height: auto;
       opacity: 0.95;
-    }}
-    img.hero {{
-      display: block;
-      margin: 20px auto 40px;
-      max-width: 100%;
-      border-radius: 14px;
-      box-shadow: 0 0 25px rgba(0,0,0,.3);
     }}
     .highlight {{
       background: var(--card);
@@ -136,11 +129,9 @@ TEMPLATE_POST = """<!doctype html>
     <h1>{title}</h1>
     {image}
     <div class='highlight'>
-      <strong>Mini-resumen:</strong> {body[:120]}...
+      <strong>Mini-resumen:</strong> {summary}
     </div>
-
     <p>{body}</p>
-
     <div class='learn-box'>
       <h3>💡 3 aprendizajes clave</h3>
       <ul>
@@ -149,11 +140,8 @@ TEMPLATE_POST = """<!doctype html>
         <li>Conviértelo en hábito: mejora 1% cada día.</li>
       </ul>
     </div>
-
     <a class='cta' href='{product}' target='_blank' rel='noopener'>Acceder al Pack PRO</a>
-
     {link}
-
     <hr>
     <p class='muted'>Etiquetas: {tags}</p>
   </article>
@@ -164,64 +152,26 @@ TEMPLATE_POST = """<!doctype html>
 </html>"""
 
 
-
-
-def render_post_html(title, body, url, image, tags, product_url, affiliate_tag):
-    if affiliate_tag and url and "?" not in url:
-        url = f"{url}?tag={affiliate_tag}"
-    img = f"<img src='{image}' alt='' style='max-width:100%;border-radius:14px;margin-bottom:20px;'>" if image else ""
-    link = f"<p><a href='{url}' target='_blank' rel='noopener'>{url}</a></p>" if url else ""
+def render_post_html(title, body, url, image, tags, product_url):
+    summary = (body[:150] + "...") if len(body) > 150 else body
+    img = f"<img src='{image}' alt='' class='hero'>" if image else ""
+    link = f"<p><a href='{url}' target='_blank' rel='noopener' style='color:#10b981'>{url}</a></p>" if url else ""
     return TEMPLATE_POST.format(
         title=title,
         desc=body[:150].replace('"', ''),
         date=DATE_TODAY,
         image=img,
         body=body,
-        product=product_url or "#",
+        product=product_url,
         link=link,
         tags=tags,
+        summary=summary
     )
 
 
-def update_blog_index():
-    """Crea índice visual del blog"""
-    items = []
-    for p in sorted(BLOG.glob("*.html"), key=lambda x: x.stat().st_mtime, reverse=True):
-        if p.name == "index.html":
-            continue
-        title = p.stem.replace("-", " ").title()
-        date = DATE_TODAY
-        items.append(f"""
-        <div class='post-card'>
-          <h2><a href='/blog/{p.name}'>{title}</a></h2>
-          <p>{date}</p>
-          <a href='/blog/{p.name}'>Leer más →</a>
-        </div>
-        """)
-    html = (ROOT / "blog" / "index.html").read_text(encoding="utf-8")
-    html = html.replace("<!-- BLOG_POSTS -->", "\n".join(items))
-    (ROOT / "blog" / "index.html").write_text(html, encoding="utf-8")
-    return items
-
-
-def update_home_latest():
-    """Inserta los 4 posts más recientes en el index principal"""
-    links = []
-    for p in sorted(BLOG.glob("*.html"), key=lambda x: x.stat().st_mtime, reverse=True):
-        if p.name == "index.html":
-            continue
-        title = p.stem.replace("-", " ").title()
-        links.append(f"<div><a href='/blog/{p.name}'>{title}</a></div>")
-    links = links[:4]
-    home = (ROOT / "index.html").read_text(encoding="utf-8")
-    home = home.replace("<!-- LATEST_POSTS -->", "<div class='postlist'>" + "".join(links) + "</div>")
-    (ROOT / "index.html").write_text(home, encoding="utf-8")
-
-
 def main():
-    """Genera un post diario y actualiza el blog"""
     if not DATA.exists():
-        print("queue.csv no encontrado.")
+        print("❌ No se encontró data/queue.csv")
         return
 
     with open(DATA, newline="", encoding="utf-8") as f:
@@ -229,27 +179,26 @@ def main():
         rows = list(reader)
 
     for row in rows:
-        if row["status"] == "pending":
+        if row.get("status", "pending") == "pending":
             title = row["title"]
             body = row["body"]
-            url = row["url"]
-            image = row["image"]
-            tags = row["tags"]
+            url = row.get("url", "")
+            image = row.get("image", "")
+            tags = row.get("tags", "")
             filename = "-".join(title.lower().split()) + ".html"
             outpath = BLOG / filename
-            html = render_post_html(title, body, url, image, tags, PRODUCT_URL, AFFILIATE_TAG)
+            html = render_post_html(title, body, url, image, tags, PRODUCT_URL)
             outpath.write_text(html, encoding="utf-8")
             row["status"] = "done"
+            print(f"✅ Publicado: {title}")
             break
+    else:
+        print("⚠️ No hay entradas pendientes en la cola.")
 
     with open(DATA, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
-
-    update_blog_index()
-    update_home_latest()
-    print("Blog actualizado correctamente.")
 
 
 if __name__ == "__main__":
