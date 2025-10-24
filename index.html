@@ -2,24 +2,41 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Recursos MkPato — Finanzas & Productividad</title>
-  <style>
-    :root { --b:#10B981; --d:#111827; --m:#6B7280; }
-    body { font-family:system-ui, -apple-system, Segoe UI, Roboto, Inter; margin:0; color:var(--d); }
-    .hero { padding:64px 24px; max-width:900px; margin:0 auto; }
-    .cta { display:inline-block; background:var(--b); color:white; padding:14px 22px; border-radius:12px;
-           text-decoration:none; font-weight:700; margin-top:20px; }
-    .muted { color:var(--m); }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MkPato — Convierte claridad en dinero</title>
+  <meta name="description" content="Ideas y recursos diarios para mejorar finanzas y productividad. Publicación automática + CTA a tu pack PRO.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-  <section class="hero">
+  <header class="container hero">
+    <span class="badge">Publicación automática diaria</span>
     <h1>Convierte claridad en dinero 💶</h1>
-    <p>Ideas y recursos diarios para mejorar tus finanzas y productividad.</p>
-    <a class="cta" href="https://go.hotmart.com/F102330634N?dp=1" target="_blank" rel="noopener">Acceder al pack PRO</a>
-    <p class="muted">Publicación automática diaria · MkPato</p>
-    <p><a href="/blog/">Ver blog →</a></p>
-  </section>
+    <p class="muted">Guías accionables, mini-sistemas y prompts para <strong>dominar tus finanzas</strong> y tu tiempo.</p>
+    <a class="cta" href="https://go.hotmart.com/F102330634N?dp=1" target="_blank" rel="noopener">Acceder al Pack PRO</a>
+    <div class="grid">
+      <div class="card"><h3>🚀 Acción inmediata</h3><p>Micro-planes de 15 min. Menos teoría, más ejecución.</p></div>
+      <div class="card"><h3>🤖 Sistema autónomo</h3><p>Contenido diario + distribución automática. Tú cobras.</p></div>
+      <div class="card"><h3>📈 Enfoque en conversión</h3><p>CTA claro, sin fricción. Hotmart listo.</p></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Últimos artículos</h2>
+    <!-- LATEST_POSTS -->
+    <div class="postlist">
+      <!-- El generador insertará aquí las 4 últimas entradas -->
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3>¿Cómo usar este sitio para ganar dinero?</h3>
+      <p>Lee un artículo, aplica el <em>mini-sistema</em> y guarda el resultado. Repite durante 30 días. Si quieres la colección completa con plantillas y flujos, entra al <a href="https://go.hotmart.com/F102330634N?dp=1" target="_blank">Pack PRO</a>.</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    © <span id="y"></span> MkPato · <a href="/blog/">Archivo</a>
+  </footer>
+  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body>
 </html>
