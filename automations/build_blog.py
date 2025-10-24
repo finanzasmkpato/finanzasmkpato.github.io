@@ -21,14 +21,16 @@ import requests, os, random
 
 def generate_long_article(title: str, summary: str, tags: str) -> str:
     """
-    Genera artículo profesional (~1000 palabras) con estructura completa, tono editorial y SEO-friendly.
-    Incluye fallback automático si el modelo falla.
+    Genera un artículo profesional (~1000 palabras) con estructura SEO y estilo editorial.
+    Usa modelos 100 % gratuitos (Falcon 7B y FLAN T5) sin depender de OpenAI.
     """
 
-    main_model = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct")
+    # ✅ Modelos gratuitos y abiertos
+    main_model = os.getenv("HF_MODEL_ID", "tiiuae/falcon-7b-instruct")
     backup_model = "google/flan-t5-large"
     HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
+    # 🔹 Cliente de inferencia
     def infer(model_id, prompt):
         client = InferenceClient(token=HF_API_TOKEN)
         return client.text_generation(
@@ -41,36 +43,61 @@ def generate_long_article(title: str, summary: str, tags: str) -> str:
             return_full_text=False,
         ).strip()
 
-    # 🔹 Variedad de estilo para rotar automáticamente
+    # 🔹 Variación automática de estilo
     styles = [
         "una guía práctica paso a paso",
-        "un artículo de reflexión profunda",
         "una historia inspiradora con moraleja financiera",
-        "una mini-lección de productividad real",
-        "un análisis con ejemplos reales y consejos aplicables"
+        "una reflexión de mentalidad y enfoque",
+        "un mini-curso con consejos aplicables",
+        "un análisis claro y estructurado de productividad"
     ]
     tone = random.choice(styles)
 
-    # 🔹 Prompt mejorado para redacción PRO
+    # 🔹 Prompt PRO adaptado a Falcon-7B
     prompt = f"""
-Eres un redactor experto en finanzas personales, productividad y hábitos.
+Eres un redactor experto en finanzas personales y productividad.
 
-Redacta un artículo en español de unas 1000 palabras titulado "{title}".
-Debe estar basado en esta idea: "{summary}".
+Redacta un artículo en español de entre 950 y 1100 palabras titulado:
+"{title}"
 
-El texto debe tener una estructura profesional con:
-1. Un subtítulo atractivo (H2) bajo el título principal.
-2. Una introducción con gancho y contexto real.
-3. Secciones claras con subtítulos H3.
-4. Listas con viñetas o pasos concretos.
-5. Un ejemplo real o mini-historia.
-6. Una conclusión potente con CTA implícito a mejorar la claridad financiera o usar el sistema de MkPato.
+Debe basarse en la idea: "{summary}"
 
-Tono: claro, cercano, profesional, con autoridad amable.
-Evita relleno y frases vacías. Que aporte valor real y acción inmediata.
+Estructura profesional y clara:
+- Introducción con gancho y contexto (sin título “introducción”).
+- 3 a 5 secciones con subtítulos H2 o H3.
+- Consejos prácticos o pasos enumerados.
+- Un ejemplo real o historia breve (mínimo un párrafo).
+- Conclusión potente con mensaje final y acción.
 
-Incluye etiquetas y menciona conceptos de {tags or "finanzas, productividad, claridad, hábitos"}.
+Tono: profesional, cercano y claro.  
+Evita frases vacías o redundantes. Prioriza el valor práctico.  
+Integra naturalmente los temas {tags or "finanzas, claridad, productividad"} sin forzarlos.  
+Usa frases cortas, lenguaje humano y ritmo natural.
 """
+
+    def cleanup(text: str) -> str:
+        text = text.strip()
+        if not text:
+            return expand_fallback(title, summary, tags)
+        text = text.replace("**", "").replace("###", "").replace("##", "")
+        return text
+
+    # 🔹 Lógica principal con fallback automático
+    try:
+        print(f"🧠 Generando artículo con {main_model}...")
+        return cleanup(infer(main_model, prompt))
+    except (RepositoryNotFoundError, requests.exceptions.HTTPError) as e:
+        print(f"⚠️ Error con {main_model}: {e}")
+        print("→ Probando modelo alternativo FLAN-T5...")
+        try:
+            return cleanup(infer(backup_model, prompt))
+        except Exception as e2:
+            print(f"⚠️ Fallback también falló: {e2}")
+            return expand_fallback(title, summary, tags)
+    except Exception as e:
+        print(f"⚠️ Error inesperado: {e}")
+        return expand_fallback(title, summary, tags)
+
 
     def cleanup(text: str) -> str:
         text = text.strip()
