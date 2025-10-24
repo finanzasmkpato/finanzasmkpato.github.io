@@ -1,0 +1,19 @@
+- status: pending
+  meta:
+    title: "Checklist 10 minutos de control financiero"
+    subtitle: "Menos ruido, más dinero en el bolsillo"
+    slug: "checklist-10-minutos-control"
+    caption: "Checklist 10' MkPato — Toma el control hoy"
+  sections:
+    - title: "Qué harás cada día (7 días)"
+      bullets:
+        - "Revisar saldos y próximos pagos"
+        - "Elegir la acción con mayor retorno"
+        - "Eliminar una distracción / gasto tonto"
+        - "Medir si hubo avance real (sí/no)"
+    - title: "Reglas de oro"
+      text: "• No acumules tareas. • Una acción con retorno > tres sin retorno. • Lo que no se mide, no existe."
+    - title: "Seguimiento"
+      bullets:
+        - "Marca ✓ o ✗ al final del día"
+        - "Premia la constancia, no la perfección"
