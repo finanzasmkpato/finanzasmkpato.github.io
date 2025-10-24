@@ -37,6 +37,7 @@ hr{{border:none;border-top:1px solid #1f2937;margin:30px 0;}}
 </style>
 </head>
 <body>
+<img src='/assets/DckFinalSinfondo.png' alt='MkPato logo' style='width:80px;height:auto;margin:20px auto;display:block;'>
 <article>
   <p class='date'>{date}</p>
   <h1>{title}</h1>
