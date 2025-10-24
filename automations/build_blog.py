@@ -40,15 +40,15 @@ TEMPLATE_POST = """<!doctype html>
       line-height: 1.7;
     }}
     article {{
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
       padding: 60px 24px;
     }}
     h1 {{
       text-align: center;
-      font-size: 34px;
+      font-size: 36px;
       font-weight: 800;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       color: var(--text);
     }}
     p.date {{
@@ -59,23 +59,54 @@ TEMPLATE_POST = """<!doctype html>
     }}
     img.logo {{
       display: block;
-      margin: 30px auto 10px;
+      margin: 40px auto 10px;
       width: 80px;
       height: auto;
       opacity: 0.95;
     }}
+    img.hero {{
+      display: block;
+      margin: 20px auto 40px;
+      max-width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 0 25px rgba(0,0,0,.3);
+    }}
+    .highlight {{
+      background: var(--card);
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      border-radius: var(--radius);
+      margin: 30px 0;
+      font-size: 15px;
+    }}
+    .learn-box {{
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 40px;
+    }}
+    .learn-box h3 {{
+      margin-top: 0;
+      color: var(--brand);
+      font-weight: 700;
+    }}
+    .learn-box ul {{
+      margin: 10px 0 0 20px;
+      padding: 0;
+      color: var(--text);
+    }}
     a.cta {{
       display: block;
       width: fit-content;
-      margin: 30px auto;
+      margin: 40px auto;
       text-align: center;
       background: linear-gradient(135deg, var(--brand), var(--brand-2));
       color: #07131a;
-      padding: 14px 24px;
+      padding: 16px 28px;
       border-radius: var(--radius);
       font-weight: 700;
       text-decoration: none;
-      box-shadow: 0 6px 25px rgba(16,185,129,.25);
+      box-shadow: 0 8px 25px rgba(16,185,129,.25);
       transition: all .2s ease-in-out;
     }}
     a.cta:hover {{
@@ -84,24 +115,17 @@ TEMPLATE_POST = """<!doctype html>
     hr {{
       border: none;
       border-top: 1px solid #1f2937;
-      margin: 30px 0;
-    }}
-    p.muted {{
-      color: var(--muted);
-      font-size: 14px;
+      margin: 40px 0;
     }}
     footer {{
       text-align: center;
-      margin-bottom: 40px;
+      margin: 60px 0;
       color: var(--muted);
+      font-size: 14px;
     }}
     footer a {{
       color: var(--brand);
       text-decoration: none;
-    }}
-    a.inline {{
-      color: var(--brand);
-      text-decoration: underline;
     }}
   </style>
 </head>
@@ -111,9 +135,25 @@ TEMPLATE_POST = """<!doctype html>
     <p class='date'>{date}</p>
     <h1>{title}</h1>
     {image}
+    <div class='highlight'>
+      <strong>Mini-resumen:</strong> {body[:120]}...
+    </div>
+
     <p>{body}</p>
+
+    <div class='learn-box'>
+      <h3>💡 3 aprendizajes clave</h3>
+      <ul>
+        <li>Aplica el sistema, no la teoría.</li>
+        <li>Registra tus resultados diarios en 2 minutos.</li>
+        <li>Conviértelo en hábito: mejora 1% cada día.</li>
+      </ul>
+    </div>
+
     <a class='cta' href='{product}' target='_blank' rel='noopener'>Acceder al Pack PRO</a>
+
     {link}
+
     <hr>
     <p class='muted'>Etiquetas: {tags}</p>
   </article>
@@ -122,7 +162,6 @@ TEMPLATE_POST = """<!doctype html>
   </footer>
 </body>
 </html>"""
-
 
 
 
