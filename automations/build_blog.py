@@ -243,13 +243,22 @@ def main():
     summary = r.get("body","").strip()  # tratamos body como “resumen” si existe
 
     # Generar cuerpo con IA si no hay body largo
-    article_body = generate_long_article(title, summary, tags)
+article_body = generate_long_article(title, summary, tags)
 
-    # Escribir post
-    BLOG.mkdir(exist_ok=True)
-    slug="-".join(re.findall(r"[a-z0-9áéíóúüñ]+", title.lower())).replace(" ", "-")
-    out=BLOG/f"{slug}.html"
-    out.write_text(render_post_html(title, article_body, url, tags, PRODUCT_URL, summary), encoding="utf-8")
+# Protección si la IA no devuelve texto
+if not article_body or not isinstance(article_body, str) or len(article_body.strip()) < 100:
+    print("⚠️ La IA devolvió un texto vacío o demasiado corto. Usando fallback local.")
+    article_body = expand_fallback(title, summary, tags)
+
+# Escribir post
+BLOG.mkdir(exist_ok=True)
+slug = "-".join(re.findall(r"[a-z0-9áéíóúüñ]+", title.lower()))
+out = BLOG / f"{slug}.html"
+out.write_text(
+    render_post_html(title, article_body, url, tags, PRODUCT_URL, summary),
+    encoding="utf-8"
+)
+
 
     # Marcar como done
     rows[idx]["status"]="done"
