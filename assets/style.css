@@ -1,34 +1,141 @@
-:root{
-  --bg:#0b1020;            /* fondo oscuro elegante */
-  --card:#0f172a;          /* tarjetas */
-  --muted:#9aa4b2;
-  --text:#e5e7eb;
-  --brand:#10b981;         /* verde */
-  --brand-2:#34d399;
-  --ring:rgba(16,185,129,.35);
-  --max:1100px;
+:root {
+  --bg: #0b1221;
+  --text: #e6edf7;
+  --muted: #8b98b9;
+  --brand: #10b981;
+  --brand-2: #34d399;
+  --card: #111b2c;
+  --radius: 16px;
+  font-family: 'Inter', system-ui, sans-serif;
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
-a{color:var(--brand);text-decoration:none}
-a:hover{opacity:.9}
-.container{max-width:var(--max);margin:0 auto;padding:28px 20px}
-.badge{display:inline-block;background:rgba(16,185,129,.12);color:var(--brand);padding:6px 10px;border:1px solid var(--ring);border-radius:999px;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-h1{font-size:46px;line-height:1.1;margin:14px 0 8px}
-h2{font-size:28px;margin:6px 0 10px}
-p.muted{color:var(--muted)}
-.hero{padding-top:30px;padding-bottom:8px}
-.cta{display:inline-block;margin-top:16px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#07131a;
-  padding:14px 22px;border-radius:14px;font-weight:800;border:1px solid #0b2d1f;box-shadow:0 10px 30px rgba(16,185,129,.15)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
-.card{background:var(--card);border:1px solid #1f2937;border-radius:18px;padding:18px}
-.card h3{margin:0 0 8px}
-.footer{color:var(--muted);text-align:center;padding:40px 0}
-.postlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.postlist a{display:block;background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:14px 16px;font-weight:600}
-kbd{background:#0b1a2b;border:1px solid #1f2937;border-radius:6px;padding:2px 6px;color:#a7b6c3}
-.post{max-width:800px;margin:0 auto}
-.post h1{font-size:40px}
-.post img{max-width:100%;border-radius:14px;border:1px solid #1f2937}
-hr{border:none;border-top:1px solid #1f2937;margin:22px 0}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.7;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+}
+
+.hero img {
+  width: 100px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px;
+  transform: translateY(-5px);
+}
+
+h1, h2, h3 {
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+p {
+  font-size: 16px;
+  color: var(--text);
+  margin: 10px 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.cta {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #07131a;
+  padding: 14px 24px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: 20px;
+  box-shadow: 0 6px 25px rgba(16,185,129,.25);
+  transition: all .2s ease-in-out;
+}
+.cta:hover {
+  transform: translateY(-2px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+.post-card {
+  background: var(--card);
+  padding: 22px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+
+.post-card a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+article {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 60px 24px;
+}
+
+article h1 {
+  text-align: center;
+  font-size: 34px;
+  margin-bottom: 16px;
+}
+
+article img {
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0,0,0,.2);
+}
+
+a.cta {
+  display: block;
+  width: fit-content;
+  margin: 30px auto;
+  text-align: center;
+}
+
+p.date {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
