@@ -12,32 +12,14 @@ AFFILIATE_TAG = os.getenv("AFFILIATE_TAG", "")
 DATE_TODAY = datetime.date.today().isoformat()
 
 
-TEMPLATE_POST = """<!doctype html>
-<html lang='es'>
-<head>
-<meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
+TEMPLATE_POST = """<!doctype html><html lang='es'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>{title}</title>
 <meta name='description' content='{desc}'>
 <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='/assets/style.css'>
-<style>
-body{{background:var(--bg);color:var(--text);}}
-article{{max-width:800px;margin:0 auto;padding:40px 20px;line-height:1.7;}}
-h1{{font-size:40px;margin-bottom:12px;color:var(--text);}}
-p.date{{color:var(--muted);margin-bottom:24px;font-size:14px;}}
-p{{margin-bottom:18px;}}
-img{{max-width:100%;border-radius:14px;margin:20px 0;border:1px solid #1f2937;}}
-a.cta{{display:inline-block;margin-top:24px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
-color:#07131a;padding:14px 22px;border-radius:14px;font-weight:800;text-decoration:none;border:1px solid #0b2d1f;box-shadow:0 8px 30px rgba(16,185,129,.2);}}
-a.cta:hover{{transform:translateY(-2px);}}
-footer{{text-align:center;margin-top:40px;color:var(--muted);}}
-footer a{{color:var(--brand);}}
-hr{{border:none;border-top:1px solid #1f2937;margin:30px 0;}}
-</style>
-</head>
-<body>
-<img src='/assets/DckFinalSinfondo.png' alt='MkPato logo' style='width:80px;height:auto;margin:20px auto;display:block;'>
+</head><body>
+<img src='/assets/DckFinalSinfondo.png' alt='MkPato logo' style='width:80px;height:auto;margin:30px auto 10px;display:block;'>
 <article>
   <p class='date'>{date}</p>
   <h1>{title}</h1>
@@ -51,8 +33,8 @@ hr{{border:none;border-top:1px solid #1f2937;margin:30px 0;}}
 <footer>
   <p><a href='/blog/'>← Volver al archivo</a></p>
 </footer>
-</body>
-</html>"""
+</body></html>"""
+
 
 
 
