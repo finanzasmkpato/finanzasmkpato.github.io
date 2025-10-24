@@ -17,54 +17,52 @@ def generate_long_article(title: str, summary: str, tags: str) -> str:
     """
 
     intros = [
-        f"{summary.capitalize()}. En un mundo lleno de distracciones, aplicar {title.lower()} se ha vuelto una de las claves para quienes buscan resultados reales.",
+        f"{summary.capitalize()}. En un mundo lleno de distracciones, aplicar {title.lower()} se ha vuelto clave para quienes buscan resultados reales.",
         f"¿Cuántas veces has sentido que trabajas mucho pero avanzas poco? {title} puede ser la diferencia entre el caos y la claridad.",
     ]
 
     h2_sections = [
-        ("Por qué este principio funciona", 
-         f"El enfoque de {title.lower()} no es magia, es gestión consciente. Cuando diriges tu energía a lo esencial, el progreso se acelera sin necesidad de hacer más."),
-        ("Cómo aplicarlo paso a paso", 
-         "Empieza pequeño: elige una tarea, elimina lo que no aporta y repite. La consistencia supera a la intensidad esporádica."),
-        ("Errores que debes evitar", 
-         "El más común es confundir movimiento con progreso. No necesitas más herramientas, sino más intención. Mide resultados, no horas."),
-        ("Ejemplo real", 
-         "Ana, una diseñadora freelance, dedicaba horas a responder correos. Al aplicar este método, bloqueó 30 minutos diarios para gestión y liberó 2 horas de trabajo profundo."),
-        ("Conclusión", 
-         f"{title} no es una moda, es un sistema de enfoque. Aplica la regla 1–1–1: un objetivo, una acción clave y un freno que eliminarás hoy.")
+        ("🧭 Por qué este principio funciona", 
+         f"El enfoque de {title.lower()} no es magia: es gestión consciente. Cuando diriges tu energía a lo esencial, el progreso se acelera sin hacer más."),
+        ("⚙️ Cómo aplicarlo paso a paso", 
+         "Empieza pequeño: elige una tarea, elimina lo que no aporta y repite. La consistencia vence a la intensidad."),
+        ("🚫 Errores que debes evitar", 
+         "El más común es confundir movimiento con progreso. No necesitas más herramientas, sino más intención."),
+        ("💡 Ejemplo real", 
+         "Ana, diseñadora freelance, dedicaba horas a responder correos. Al aplicar este método, bloqueó 30 minutos diarios y liberó 2 horas para trabajo profundo."),
+        ("🔚 Conclusión", 
+         f"{title} no es una moda: es un sistema para enfocar tu energía y avanzar con claridad.")
     ]
 
     tips = [
-        "Crea una lista de no-tareas: cosas que ya no harás.",
-        "Define un bloque diario de tiempo sin interrupciones.",
+        "Crea una lista de *no-tareas*: cosas que ya no harás.",
+        "Define un bloque diario sin interrupciones.",
         "Evalúa cada noche en qué invertiste tu energía.",
         "Automatiza pequeñas decisiones para liberar enfoque.",
     ]
 
     story_snippets = [
-        "Pedro, un emprendedor digital, descubrió que solo el 20 % de sus tareas generaban el 80 % de sus ingresos. Al enfocarse en esas, duplicó su facturación en tres meses.",
-        "Laura, estudiante y madre, usó la técnica 1-1-1 para equilibrar estudio, trabajo y descanso sin sentirse desbordada.",
-        "Un equipo remoto de marketing adoptó esta metodología y redujo sus reuniones un 40 %, ganando claridad y motivación.",
+        "Pedro, emprendedor digital, descubrió que solo el 20 % de sus tareas generaban el 80 % de sus ingresos.",
+        "Laura, estudiante y madre, usó la técnica 1-1-1 para equilibrar estudio, trabajo y descanso.",
+        "Un equipo remoto redujo sus reuniones un 40 % al adoptar este método, ganando claridad y motivación.",
     ]
 
-    body = []
-    body.append(f"<p>{random.choice(intros)}</p>")
+    body = f"<p>{random.choice(intros)}</p>"
 
     for h2, paragraph in h2_sections:
-        body.append(f"<h2>{h2}</h2>\n<p>{paragraph}</p>")
+        body += f"<h2>{h2}</h2><p>{paragraph}</p>"
         if "Cómo aplicarlo" in h2:
-            body.append("<ul>" + "".join([f"<li>{t}</li>" for t in tips]) + "</ul>")
+            body += "<ul>" + "".join([f"<li>{t}</li>" for t in tips]) + "</ul>"
         if "Ejemplo real" in h2:
-            body.append(f"<p>{random.choice(story_snippets)}</p>")
+            body += f"<p>{random.choice(story_snippets)}</p>"
 
     cierre = random.choice([
-        f"En resumen, {title} te entrena para pensar con claridad y actuar con propósito.",
-        f"Empieza hoy. No esperes el momento perfecto: créalo aplicando {title.lower()} desde ahora.",
+        f"<p>En resumen, {title} te entrena para pensar con claridad y actuar con propósito.</p>",
+        f"<p>Empieza hoy: no esperes el momento perfecto, créalo aplicando {title.lower()} desde ahora.</p>",
     ])
-    body.append(f"<p>{cierre}</p>")
 
-    article = "\n\n".join(body)
-    return textwrap.fill(article, 100)
+    return body + cierre
+
 
 
 # === RENDER HTML ===
