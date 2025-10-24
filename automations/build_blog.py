@@ -1,8 +1,9 @@
-# build_blog.py — MkPato PRO + IA (HuggingFace Inference API)
 from pathlib import Path
-import csv, os, datetime, re
+import csv, os, datetime, re, random, requests
 from huggingface_hub import InferenceClient
+from huggingface_hub.errors import RepositoryNotFoundError
 
+# === CONFIG ===
 ROOT = Path(__file__).resolve().parents[1]
 BLOG = ROOT / "blog"
 DATA = ROOT / "data" / "queue.csv"
@@ -10,43 +11,29 @@ DATA = ROOT / "data" / "queue.csv"
 PRODUCT_URL = os.getenv("PRODUCT_URL", "https://go.hotmart.com/F102330634N?dp=1")
 AFFILIATE_TAG = os.getenv("AFFILIATE_TAG", "")
 HF_API_TOKEN = os.getenv("HF_API_TOKEN", "")
-MODEL_ID = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct")  # puedes cambiarlo
-
 DATE_TODAY = datetime.date.today().isoformat()
 
-# ---------- IA ----------
-from huggingface_hub import InferenceClient
-from huggingface_hub.errors import RepositoryNotFoundError
-import requests, os, random
 
+# === GENERACIÓN DE TEXTO CON IA ===
 def generate_long_article(title: str, summary: str, tags: str) -> str:
-    """
-    Genera un artículo profesional (~1000 palabras) con estructura SEO y estilo editorial.
-    Usa modelos 100 % gratuitos (Falcon 7B y FLAN T5) sin depender de OpenAI.
-    """
+    """Genera artículo extenso (~1000 palabras) con IA gratuita y fallback automático."""
 
-    # ✅ Modelos gratuitos y abiertos
     main_model = os.getenv("HF_MODEL_ID", "google/flan-t5-xl")
     backup_model = "meta-llama/Llama-3-8b-instruct"
-    HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
-    # 🔹 Cliente de inferencia
-def infer(model_id, prompt):
-    client = InferenceClient(token=HF_API_TOKEN)
-    # Para modelos tipo text2text-generation produce textos largos y estructurados
-    result = client.text_generation(
-        model=model_id,
-        prompt=prompt,
-        max_new_tokens=2000,
-        temperature=0.7,
-        top_p=0.9,
-        repetition_penalty=1.05,
-        return_full_text=False,
-    )
-    return result.strip()
+    def infer(model_id, prompt):
+        client = InferenceClient(token=HF_API_TOKEN)
+        result = client.text_generation(
+            model=model_id,
+            prompt=prompt,
+            max_new_tokens=2000,
+            temperature=0.7,
+            top_p=0.9,
+            repetition_penalty=1.05,
+            return_full_text=False,
+        )
+        return result.strip()
 
-
-    # 🔹 Variación automática de estilo
     styles = [
         "una guía práctica paso a paso",
         "una historia inspiradora con moraleja financiera",
@@ -56,96 +43,60 @@ def infer(model_id, prompt):
     ]
     tone = random.choice(styles)
 
-    # 🔹 Prompt PRO adaptado a Falcon-7B
     prompt = f"""
 Eres un redactor experto en finanzas personales y productividad.
-
-Redacta un artículo en español de entre 950 y 1100 palabras titulado:
-"{title}"
-
-Debe basarse en la idea: "{summary}"
-
-Estructura profesional y clara:
-- Introducción con gancho y contexto (sin título “introducción”).
-- 3 a 5 secciones con subtítulos H2 o H3.
-- Consejos prácticos o pasos enumerados.
-- Un ejemplo real o historia breve (mínimo un párrafo).
-- Conclusión potente con mensaje final y acción.
-
-Tono: profesional, cercano y claro.  
-Evita frases vacías o redundantes. Prioriza el valor práctico.  
-Integra naturalmente los temas {tags or "finanzas, claridad, productividad"} sin forzarlos.  
-Usa frases cortas, lenguaje humano y ritmo natural.
+Escribe un artículo en español de entre 950 y 1100 palabras titulado "{title}".
+Debe basarse en la idea: "{summary}".
+Estructura profesional:
+1. Introducción con gancho y contexto (sin título “introducción”)
+2. 3–5 secciones con subtítulos H2 o H3
+3. Consejos o pasos concretos con ejemplos
+4. Historia o ejemplo real (mínimo un párrafo)
+5. Conclusión con mensaje potente y acción.
+Tono: profesional, claro y humano.
+Integra naturalmente temas de {tags or "finanzas, productividad, claridad"}.
 """
 
     def cleanup(text: str) -> str:
         text = text.strip()
         if not text:
-            return expand_fallback(title, summary, tags)
+            return None
         text = text.replace("**", "").replace("###", "").replace("##", "")
         return text
 
-    # 🔹 Lógica principal con fallback automático
     try:
         print(f"🧠 Generando artículo con {main_model}...")
-        return cleanup(infer(main_model, prompt))
-    except (RepositoryNotFoundError, requests.exceptions.HTTPError) as e:
-        print(f"⚠️ Error con {main_model}: {e}")
-        print("→ Probando modelo alternativo FLAN-T5...")
-        try:
-            return cleanup(infer(backup_model, prompt))
-        except Exception as e2:
-            print(f"⚠️ Fallback también falló: {e2}")
-            return expand_fallback(title, summary, tags)
+        text = cleanup(infer(main_model, prompt))
+        if not text or len(text.split()) < 300:
+            raise ValueError("Texto demasiado corto o vacío.")
+        return text
     except Exception as e:
-        print(f"⚠️ Error inesperado: {e}")
-        return expand_fallback(title, summary, tags)
-
-
-    def cleanup(text: str) -> str:
-        text = text.strip()
-        if not text:
+        print(f"⚠️ Error con {main_model}: {e}")
+        print("→ Probando modelo alternativo (Llama-3-8B-Instruct)...")
+        try:
+            text = cleanup(infer(backup_model, prompt))
+            if not text or len(text.split()) < 300:
+                raise ValueError("Texto vacío en fallback.")
+            return text
+        except Exception as e2:
+            print(f"⚠️ Fallo total IA: {e2}")
             return expand_fallback(title, summary, tags)
 
 
-    client = InferenceClient(token=HF_API_TOKEN)
-    prompt = f"""Eres un escritor experto en productividad y finanzas personales.
-Escribe un artículo de 500 palabras en español, claro y accionable, sobre: "{title}".
-Contexto/resumen: "{summary or title}".
-Estructura: 1) introducción breve con gancho, 2) desarrollo con 3–4 ideas prácticas,
-3) ejemplo real o mini-historia, 4) cierre con consejo accionable.
-Tono: profesional, directo, sin paja. Evita listas vacías; usa párrafos consistentes.
-Relaciona con: {tags or "productividad, finanzas, claridad mental"}.
-"""
-    # Generación
-    out = client.text_generation(
-        model=MODEL_ID,
-        prompt=prompt,
-        max_new_tokens=700,  # ~500 palabras
-        temperature=0.8,
-        top_p=0.95,
-        repetition_penalty=1.05,
-        return_full_text=False,
-    )
-    text = out.strip()
-    return cleanup(text)
-
+# === BACKUP LOCAL (SIN IA) ===
 def expand_fallback(title: str, summary: str, tags: str) -> str:
-    """Generador offline (por si falla la API). ~450–550 palabras."""
+    """Texto alternativo si la IA falla."""
     s = summary or title
     p1 = f"{s.capitalize()}. Esta idea resume un principio simple: la claridad dirige la acción."
     p2 = f"En {tags or 'productividad'}, muchas personas saltan de tarea en tarea sin prioridad. {title} reduce el ruido y enfoca energía."
-    p3 = f"Cómo aplicarlo hoy: define 1 objetivo, 1 tarea clave y 1 freno que vas a eliminar. Escríbelo y blíndalo en tu agenda."
+    p3 = "Cómo aplicarlo hoy: define 1 objetivo, 1 tarea clave y 1 freno que vas a eliminar. Escríbelo y blíndalo en tu agenda."
     p4 = "Errores comunes: confundir movimiento con progreso, acumular herramientas sin hábitos y no medir resultados."
     p5 = "Mini-historia: un lector bloqueó 20 minutos al día para su 1 tarea clave. En 3 semanas terminó un proyecto aparcado 6 meses."
     p6 = "Cierre: convierte esto en un estándar. Evalúa al final del día si cumpliste tu 1-1-1. Ajusta, itera y vuelve a empezar mañana."
-    return "\n\n".join([p1,p2,p3,p4,p5,p6])
+    return "\n\n".join([p1, p2, p3, p4, p5, p6])
 
-def cleanup(text: str) -> str:
-    text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    return text
 
-# ---------- PLANTILLA VISUAL DEL POST ----------
+# === RENDER HTML ===
 TEMPLATE_POST = """<!doctype html>
 <html lang='es'>
 <head>
@@ -161,13 +112,10 @@ TEMPLATE_POST = """<!doctype html>
     h1 {{ text-align:center; font-size:36px; font-weight:800; margin:20px 0; }}
     p.date {{ text-align:center; color:var(--muted); font-size:14px; margin-top:10px; }}
     img.logo {{ display:block; margin:40px auto 10px; width:80px; height:auto; opacity:.95; }}
-    .highlight {{ background:var(--card); padding:18px 20px; border-left:4px solid var(--brand); border-radius:16px; margin:30px 0; font-size:15px; }}
-    .learn-box {{ background:var(--card); border-radius:16px; padding:20px; margin-top:40px; }}
-    .learn-box h3 {{ margin-top:0; color:var(--brand); font-weight:700; }}
-    .learn-box ul {{ margin:10px 0 0 20px; padding:0; }}
-    a.cta {{ display:block; width:fit-content; margin:40px auto; text-align:center;
-             background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#07131a; padding:16px 28px;
-             border-radius:16px; font-weight:700; text-decoration:none; box-shadow:0 8px 25px rgba(16,185,129,.25); }}
+    a.cta {{ display:block; width:fit-content; margin:40px auto;
+             text-align:center; background:linear-gradient(135deg,var(--brand),var(--brand-2));
+             color:#07131a; padding:16px 28px; border-radius:16px; font-weight:700;
+             text-decoration:none; box-shadow:0 8px 25px rgba(16,185,129,.25); }}
     hr {{ border:none; border-top:1px solid #1f2937; margin:40px 0; }}
     footer {{ text-align:center; margin:60px 0; color:var(--muted); font-size:14px; }}
     footer a {{ color:var(--brand); text-decoration:none; }}
@@ -180,95 +128,97 @@ TEMPLATE_POST = """<!doctype html>
     <h1>{title}</h1>
     <div class='highlight'><strong>Mini-resumen:</strong> {summary}</div>
     <p>{body}</p>
-    <div class='learn-box'>
-      <h3>💡 3 aprendizajes clave</h3>
+    <hr>
+    <div style='background:#111b2c;padding:20px;border-radius:16px;'>
+      <h3 style='color:#10B981;'>💡 3 aprendizajes clave</h3>
       <ul>
         <li>Aplica el sistema, no la teoría.</li>
-        <li>Registra resultados en 2 minutos al día.</li>
-        <li>Itera: mejora un 1 % cada semana.</li>
+        <li>Evalúa tus resultados en 2 minutos diarios.</li>
+        <li>Mejora un 1 % cada semana.</li>
       </ul>
     </div>
-    <a class='cta' href='{product}' target='_blank' rel='noopener'>Acceder al Pack PRO</a>
-    {link}
-    <hr>
+    <div style='text-align:center;margin-top:40px;'>
+      <a class='cta' href='{product}' target='_blank'>Acceder al Pack PRO</a>
+      <p style='color:#8b98b9;font-size:14px;margin-top:10px;'>{cta}</p>
+    </div>
     <p class='muted'>Etiquetas: {tags}</p>
   </article>
   <footer><p><a href='/blog/'>← Volver al archivo</a></p></footer>
 </body>
 </html>"""
 
+
 def render_post_html(title, body, url, tags, product_url, summary):
-    link = f"<p><a href='{url}' target='_blank' rel='noopener' style='color:#10b981'>{url}</a></p>" if url else ""
-    desc = (summary or body)[:150].replace('"','')
+    desc = (summary or body)[:150].replace('"', '')
+    ctas = [
+        "Optimiza tus finanzas en 15 minutos al día.",
+        "Convierte tus hábitos en libertad financiera.",
+        "Domina tu economía y tu enfoque con MkPato.",
+        "Descubre cómo multiplicar tu claridad en menos tiempo.",
+    ]
+    chosen_cta = random.choice(ctas)
     return TEMPLATE_POST.format(
-        title=title, desc=desc, date=DATE_TODAY, summary=summary or "",
-        body=body.replace("\n", "<br><br>"), product=product_url, link=link, tags=tags
+        title=title,
+        desc=desc,
+        date=DATE_TODAY,
+        summary=summary or "",
+        body=body.replace("\n", "<br><br>"),
+        product=product_url,
+        tags=tags,
+        cta=chosen_cta,
     )
 
-def update_blog_index():
-    items=[]
-    for p in sorted(BLOG.glob("*.html"), key=lambda x:x.stat().st_mtime, reverse=True):
-        if p.name=="index.html": continue
-        t=p.stem.replace("-"," ").title()
-        d=DATE_TODAY
-        items.append(f"<div class='post-card'><h2><a href='/blog/{p.name}'>{t}</a></h2><p>{d}</p><a href='/blog/{p.name}'>Leer más →</a></div>")
-    idx=(ROOT/"blog/index.html").read_text(encoding="utf-8")
-    idx=idx.replace("<!-- BLOG_POSTS -->","\n".join(items))
-    (ROOT/"blog/index.html").write_text(idx,encoding="utf-8")
 
-def update_home_latest():
-    links=[]
-    for p in sorted(BLOG.glob('*.html'), key=lambda x:x.stat().st_mtime, reverse=True):
-        if p.name=="index.html": continue
-        t=p.stem.replace("-"," ").title()
-        links.append(f"<div><a href='/blog/{p.name}'>{t}</a></div>")
-    links=links[:4]
-    home=(ROOT/"index.html").read_text(encoding="utf-8")
-    home=home.replace("<!-- LATEST_POSTS -->","<div class='postlist'>"+"".join(links)+"</div>")
-    (ROOT/"index.html").write_text(home,encoding="utf-8")
-
+# === MAIN ===
 def main():
-    rows=list(csv.DictReader(open(DATA,encoding="utf-8")))
-    # Buscar primer pending
-    idx=None
-    for i,r in enumerate(rows):
-        if r.get("status","pending").lower()=="pending":
-            idx=i; break
+    if not DATA.exists():
+        print("❌ No se encontró data/queue.csv")
+        return
+
+    with open(DATA, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    if not rows:
+        print("⚠️ CSV vacío.")
+        return
+
+    # Buscar primer pendiente
+    idx = None
+    for i, r in enumerate(rows):
+        if r.get("status", "pending").lower() == "pending":
+            idx = i
+            break
     if idx is None:
-        print("⚠️ No hay entradas pendientes."); return
-    r=rows[idx]
-    title=r.get("title","Post").strip()
-    url=r.get("url","").strip()
-    tags=r.get("tags","").strip()
-    summary = r.get("body","").strip()  # tratamos body como “resumen” si existe
+        print("⚠️ No hay entradas pendientes.")
+        return
 
-    # Generar cuerpo con IA si no hay body largo
-article_body = generate_long_article(title, summary, tags)
+    r = rows[idx]
+    title = r.get("title", "Post sin título").strip()
+    url = r.get("url", "").strip()
+    tags = r.get("tags", "").strip()
+    summary = r.get("body", "").strip()
 
-# Protección si la IA no devuelve texto
-if not article_body or not isinstance(article_body, str) or len(article_body.strip()) < 100:
-    print("⚠️ La IA devolvió un texto vacío o demasiado corto. Usando fallback local.")
-    article_body = expand_fallback(title, summary, tags)
+    article_body = generate_long_article(title, summary, tags)
 
-# Escribir post
-BLOG.mkdir(exist_ok=True)
-slug = "-".join(re.findall(r"[a-z0-9áéíóúüñ]+", title.lower()))
-out = BLOG / f"{slug}.html"
-out.write_text(
-    render_post_html(title, article_body, url, tags, PRODUCT_URL, summary),
-    encoding="utf-8"
-)
+    # Protección si la IA devuelve vacío
+    if not article_body or not isinstance(article_body, str) or len(article_body.strip()) < 100:
+        print("⚠️ Texto IA vacío o corto → usando fallback local.")
+        article_body = expand_fallback(title, summary, tags)
 
+    # Escribir post
+    BLOG.mkdir(exist_ok=True)
+    slug = "-".join(re.findall(r"[a-z0-9áéíóúüñ]+", title.lower()))
+    out = BLOG / f"{slug}.html"
+    out.write_text(render_post_html(title, article_body, url, tags, PRODUCT_URL, summary), encoding="utf-8")
 
-    # Marcar como done
-    rows[idx]["status"]="done"
-    with open(DATA,"w",newline="",encoding="utf-8") as f:
-        w=csv.DictWriter(f, fieldnames=rows[0].keys())
-        w.writeheader(); w.writerows(rows)
+    # Marcar como publicado
+    rows[idx]["status"] = "done"
+    with open(DATA, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
 
-    # Actualizar listados
-    update_blog_index(); update_home_latest()
     print(f"✅ Publicado con IA: {title} → {out}")
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
