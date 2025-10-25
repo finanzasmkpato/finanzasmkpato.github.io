@@ -1,0 +1,21 @@
+name: MkPato Daily Action Publisher
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # Cada día a las 9:00 (Madrid)
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y wkhtmltopdf
+          pip install jinja2 pyyaml pdfkit requests
+      - name: Generate and publish daily action
+        run: python automations/generate_action.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
