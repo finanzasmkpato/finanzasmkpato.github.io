@@ -1,44 +1,86 @@
-import yaml, pdfkit, random
-from jinja2 import Template
+import os
 from datetime import datetime
-import requests
+from weasyprint import HTML, CSS
 
-# === Config ===
-TELEGRAM_BOT_TOKEN = "TU_TOKEN"
-TELEGRAM_CHAT_ID = "@mkpato_pro"
+# === CONFIGURACIÓN BÁSICA ===
+# Nombre del PDF de salida
+output_pdf = "site/system_report.pdf"
 
-# === Load system data ===
-with open("data/systems.yml", "r", encoding="utf-8") as f:
-    systems = yaml.safe_load(f)["systems"]
+# Crea carpeta si no existe
+os.makedirs(os.path.dirname(output_pdf), exist_ok=True)
 
-system = random.choice(systems)
+# === HTML DEL DOCUMENTO ===
+# Puedes reemplazar este bloque con tu HTML real generado dinámicamente
+html = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe del Sistema MkPato</title>
+<style>
+  body {{
+    font-family: 'Inter', sans-serif;
+    margin: 40px;
+    color: #111827;
+  }}
+  h1 {{
+    color: #065f46;
+    text-align: center;
+  }}
+  h2 {{
+    color: #047857;
+    margin-top: 30px;
+  }}
+  .section {{
+    margin-bottom: 25px;
+  }}
+  .footer {{
+    margin-top: 40px;
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+  }}
+  .highlight {{
+    background-color: #ecfdf5;
+    padding: 10px;
+    border-radius: 8px;
+  }}
+</style>
+</head>
+<body>
+  <h1>📊 Informe del Sistema — Finanzas MkPato</h1>
+  <div class="section">
+    <h2>Resumen</h2>
+    <p>Este informe fue generado automáticamente el <b>{datetime.now().strftime('%d/%m/%Y %H:%M')}</b>.</p>
+    <div class="highlight">
+      <p>💼 Estado del sistema: <b>Operativo</b></p>
+      <p>⚙️ Automatizaciones activas: <b>3</b></p>
+      <p>💰 Ingresos estimados: <b>1.000 €/mes</b></p>
+    </div>
+  </div>
 
-# === Load HTML template ===
-with open("templates/system_template.html", "r", encoding="utf-8") as f:
-    template = Template(f.read())
+  <div class="section">
+    <h2>Próximos pasos</h2>
+    <ul>
+      <li>Optimizar embudos de tráfico orgánico.</li>
+      <li>Ampliar presencia en Hotmart y Amazon KDP.</li>
+      <li>Configurar campaña de crecimiento en Instagram.</li>
+    </ul>
+  </div>
 
-html = template.render(**system)
-
-# === Generate PDF ===
-output_pdf = f"outputs/{system['title'].replace(' ', '-').lower()}.pdf"
-pdfkit.from_string(html, output_pdf)
-
-# === Telegram message ===
-message = f"""💼 {system['title']}
-
-🎯 {system['objective']}
-
-📈 Métrica objetivo: {system['metric']}
-
-🧠 Regla MkPato: {system['rule']}
-
-📎 {system['cta']}
+  <div class="footer">
+    <p>Finanzas MkPato — Sistema autónomo de ingresos © {datetime.now().year}</p>
+  </div>
+</body>
+</html>
 """
 
-# Send to Telegram
-url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message})
+# === GENERACIÓN DEL PDF ===
+print("Generando PDF con WeasyPrint...")
 
-# Send PDF
-files = {'document': open(output_pdf, 'rb')}
-requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendDocument", data={"chat_id": TELEGRAM_CHAT_ID}, files=files)
+HTML(string=html).write_pdf(
+    output_pdf,
+    stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')]
+)
+
+print(f"✅ PDF generado correctamente: {output_pdf}")
