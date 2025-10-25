@@ -9,13 +9,14 @@
     padding: 40px;
     width: 800px;
   }
-  h1 { color: #D6A500; font-size: 28px; margin-bottom: 5px; }
-  h2 { color: #00E082; font-size: 16px; margin-top: 0; }
+  h1 { color: #D6A500; font-size: 26px; margin-bottom: 5px; }
+  h2 { color: #00E082; font-size: 15px; margin-top: 0; }
   h3 { color: #EAEAEA; border-bottom: 1px solid #444; padding-bottom: 4px; }
   ul { list-style: none; padding: 0; }
   ul li::before { content: "• "; color: #00E082; }
-  .rule { margin-top: 20px; font-style: italic; color: #FFD65A; }
-  .cta { margin-top: 30px; text-align: center; background: #00E082; color: #0B0E13; padding: 10px; border-radius: 8px; }
+  .rule { margin-top: 18px; font-style: italic; color: #FFD65A; }
+  .prompt { background: #141821; border-left: 3px solid #00E082; padding: 8px; margin-top: 12px; font-size: 13px; color: #ccc; }
+  .cta { margin-top: 24px; text-align: center; background: #00E082; color: #0B0E13; padding: 10px; border-radius: 8px; font-weight: 600; }
   img { display: block; margin: auto; width: 80px; margin-bottom: 20px; }
 </style>
 </head>
@@ -24,14 +25,14 @@
   <h1>{{ title }}</h1>
   <h2>{{ subtitle }}</h2>
   <p><strong>Objetivo:</strong> {{ objective }}</p>
-  <h3>Acciones</h3>
+  <h3>Acción directa</h3>
   <ul>
     {% for step in steps %}
       <li>{{ step }}</li>
     {% endfor %}
   </ul>
   <div class="rule">💡 {{ rule }}</div>
-  <p><strong>Métrica:</strong> {{ metric }}</p>
+  <div class="prompt">🤖 Prompt del día:<br>{{ prompt }}</div>
   <div class="cta">{{ cta }}</div>
 </body>
 </html>
